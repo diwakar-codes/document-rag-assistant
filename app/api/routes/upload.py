@@ -4,6 +4,7 @@ from fastapi import APIRouter, File, HTTPException, UploadFile
 from app.services.chunk_service import ChunkService
 from app.schemas.upload_schema import UploadResponse
 from app.services.file_service import FileService
+from app.services.embedding_service import EmbeddingService
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
@@ -44,8 +45,10 @@ async def upload_documents(file: UploadFile = File(...)):
     saved_path = FileService.save_file(file)
     document = DocumentService.extract(saved_path)
     chunks = ChunkService.split(document)
+    embedded_chunks = EmbeddingService.embed_chunks(chunks)
 
     return {
-        "document": document,
-        "chunks": chunks
+    "total_chunks": len(embedded_chunks),
+    "embedding_dimension": len(embedded_chunks[0]["embedding"]),
+    "sample_chunk": embedded_chunks[0]
     }
