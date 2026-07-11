@@ -1,4 +1,5 @@
 import pdfplumber
+from app.utils.text_cleaner import TextCleaner
 
 class PDFService:
 
@@ -8,6 +9,7 @@ class PDFService:
         with pdfplumber.open(pdf_path) as pdf:
             for page_number, page in enumerate(pdf.pages, start=1):
                 text = page.extract_text() or ""
+                text = TextCleaner.clean(text)
                 pages.append(
                     {
                         "page": page_number,
