@@ -5,6 +5,7 @@ from app.services.chunk_service import ChunkService
 from app.schemas.upload_schema import UploadResponse
 from app.services.file_service import FileService
 from app.services.embedding_service import EmbeddingService
+from app.services.pinecone_service import PineconeService
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
@@ -46,9 +47,10 @@ async def upload_documents(file: UploadFile = File(...)):
     document = DocumentService.extract(saved_path)
     chunks = ChunkService.split(document)
     embedded_chunks = EmbeddingService.embed_chunks(chunks)
+    pinecone = PineconeService()
+    pinecone.upsert_chunks(embedded_chunks)
 
     return {
-    "total_chunks": len(embedded_chunks),
-    "embedding_dimension": len(embedded_chunks[0]["embedding"]),
-    "sample_chunk": embedded_chunks[0]
+        "message": "Document indexed successfully.",
+        "chunks": len(embedded_chunks),
     }
