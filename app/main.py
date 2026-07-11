@@ -1,5 +1,7 @@
 from fastapi import FastAPI 
 from app.core.config import settings
+from app.api.routes.upload import router as upload_router
+
 
 app = FastAPI(
     title = settings.APP_NAME,
@@ -10,3 +12,4 @@ app = FastAPI(
 def health():
     return {"status": "healthy"}
 
+app.include_router(upload_router)
