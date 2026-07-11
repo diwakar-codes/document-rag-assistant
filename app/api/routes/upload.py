@@ -1,7 +1,7 @@
 from pathlib import Path 
 from app.services.document_service import DocumentService
 from fastapi import APIRouter, File, HTTPException, UploadFile
-
+from app.services.chunk_service import ChunkService
 from app.schemas.upload_schema import UploadResponse
 from app.services.file_service import FileService
 
@@ -43,12 +43,9 @@ async def upload_documents(file: UploadFile = File(...)):
 
     saved_path = FileService.save_file(file)
     document = DocumentService.extract(saved_path)
-
+    chunks = ChunkService.split(document)
 
     return {
-        "original_filename": file.filename,
-        "stored_filename": saved_path.name,
-        "file_type": extension,
-        "size": saved_path.stat().st_size,
         "document": document,
+        "chunks": chunks
     }

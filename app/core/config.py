@@ -16,6 +16,9 @@ class Settings(BaseSettings):
 
     # Embeddings
     EMBEDDING_MODEL: str
+    # Rag configs
+    CHUNK_SIZE: int = 500
+    CHUNK_OVERLAP: int = 100
 
     # Logging
     LOG_LEVEL: str = "INFO"
