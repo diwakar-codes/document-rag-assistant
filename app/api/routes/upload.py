@@ -1,5 +1,5 @@
 from pathlib import Path 
-
+from app.services.document_service import DocumentService
 from fastapi import APIRouter, File, HTTPException, UploadFile
 
 from app.schemas.upload_schema import UploadResponse
@@ -16,7 +16,7 @@ ALLOWED_EXTENSIONS = {
     ".jpeg",
 }
 
-@router.post("/", response_model=UploadResponse)
+@router.post("/")
 async def upload_documents(file: UploadFile = File(...)):
     extension = Path(file.filename).suffix.lower()
     if extension not in ALLOWED_EXTENSIONS:
@@ -42,12 +42,13 @@ async def upload_documents(file: UploadFile = File(...)):
     file.file.seek(0)
 
     saved_path = FileService.save_file(file)
+    document = DocumentService.extract(saved_path)
 
-    return UploadResponse(
-        original_filename=file.filename,
-        stored_filename=saved_path.name,
-        file_type=extension,
-        size=saved_path.stat().st_size,
-        message="File uploaded successfully."
-    )
-    
+
+    return {
+        "original_filename": file.filename,
+        "stored_filename": saved_path.name,
+        "file_type": extension,
+        "size": saved_path.stat().st_size,
+        "document": document,
+    }
