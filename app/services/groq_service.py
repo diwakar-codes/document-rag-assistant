@@ -34,7 +34,7 @@ class GroqService:
     """
 
     @staticmethod
-    def generate(question, chunks, history=None):
+    def generate(question, chunks, history=None, temperature=None, max_tokens=None):
 
         prompt = GroqService.build_prompt(
             question,
@@ -50,9 +50,14 @@ class GroqService:
         )
 
         response = GroqService.client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model=settings.GROQ_MODEL,
             messages=messages,
-            temperature=0,
+            temperature=(
+                settings.DEFAULT_TEMPERATURE if temperature is None else temperature
+            ),
+            max_tokens=(
+                settings.DEFAULT_MAX_TOKENS if max_tokens is None else max_tokens
+            ),
         )
 
         return response.choices[0].message.content

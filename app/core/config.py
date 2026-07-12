@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     BM25_CANDIDATE_POOL: int = 30
 
     # Groq generation
+    GROQ_MODEL: str = "llama-3.3-70b-versatile"
     DEFAULT_TEMPERATURE: float = 0.2
     DEFAULT_MAX_TOKENS: int = 1024
 

@@ -11,6 +11,7 @@ from app.services.embedding_service import EmbeddingService
 from app.services.file_service import BASE_UPLOAD_DIR, FileService
 from app.services.pinecone_service import PineconeService
 from app.services.store_service import StoreService
+from app.services.topic_service import TopicService
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
@@ -75,6 +76,7 @@ def _index_document(
         document_id=document_id,
         filename=filename,
     )
+    chunks = TopicService.assign_topics(chunks)
     embedded_chunks = EmbeddingService.embed_chunks(chunks)
 
     pinecone = PineconeService()
