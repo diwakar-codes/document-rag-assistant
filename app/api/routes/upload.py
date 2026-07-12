@@ -6,6 +6,7 @@ from app.schemas.upload_schema import UploadResponse
 from app.services.file_service import FileService
 from app.services.embedding_service import EmbeddingService
 from app.services.pinecone_service import PineconeService
+from app.services.store_service import StoreService
 import uuid
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
@@ -56,7 +57,17 @@ async def upload_documents(file: UploadFile = File(...)):
     pinecone = PineconeService()
     pinecone.upsert_chunks(embedded_chunks)
 
+    StoreService.add_document(
+        document_id=document_id,
+        filename=file.filename,
+        file_type=extension,
+        total_pages=document.get("total_pages", 1),
+        extraction_method=document.get("extraction_method", "pdfplumber"),
+    )
+    StoreService.add_chunks(document_id, chunks)
+
     return {
         "message": "Document indexed successfully.",
+        "document_id": document_id,
         "chunks": len(embedded_chunks),
     }

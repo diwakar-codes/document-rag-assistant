@@ -31,3 +31,6 @@ class PineconeService:
             )
 
         self.index.upsert(vectors=vectors)
+
+    def delete_by_document(self, document_id: str):
+        self.index.delete(filter={"document_id": {"$eq": document_id}})
