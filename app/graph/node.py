@@ -10,23 +10,31 @@ def retrieve_node(state):
     mode = state.get("mode") or "dense"
     top_k = state.get("top_k") or settings.DEFAULT_TOP_K
     document_id = state.get("document_id")
+    topic = state.get("topic")
+    similarity_threshold = state.get("similarity_threshold")
+    if similarity_threshold is None:
+        similarity_threshold = settings.SIMILARITY_THRESHOLD
 
     sources = RetrievalService.retrieve(
         question,
         top_k=top_k,
         mode=mode,
         document_id=document_id,
+        topic=topic,
     )
 
-    if mode == "bm25":
-        # Raw BM25 scores are unbounded, so the similarity threshold
-        # (tuned for cosine similarity) does not apply in this mode.
+    if mode == "bm25" or topic or document_id:
+        # Raw BM25 scores are unbounded, and a topic/document scope already
+        # guarantees relevance via the metadata filter — instructional
+        # tutor-style prompts ("explain like I'm a beginner") can have low
+        # semantic similarity to the source text despite being on-topic, so
+        # the cosine-similarity threshold only applies to open-corpus search.
         filtered_sources = sources
     else:
         filtered_sources = [
             source
             for source in sources
-            if source.get("score", 0) >= settings.SIMILARITY_THRESHOLD
+            if source.get("score", 0) >= similarity_threshold
         ]
 
     return {
@@ -40,6 +48,8 @@ def generate_node(state):
         question=state["question"],
         chunks=state["sources"],
         history=state["history"],
+        temperature=state.get("temperature"),
+        max_tokens=state.get("max_tokens"),
     )
 
     memory.add(

@@ -10,3 +10,7 @@ class GraphState(TypedDict):
     mode: str
     top_k: int
     document_id: Optional[str]
+    topic: Optional[str]
+    similarity_threshold: Optional[float]
+    temperature: Optional[float]
+    max_tokens: Optional[int]

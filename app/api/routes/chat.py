@@ -18,6 +18,10 @@ class ChatRequest(BaseModel):
     mode: str = "dense"  # dense | bm25 | hybrid
     top_k: int = settings.DEFAULT_TOP_K
     document_id: Optional[str] = None
+    topic: Optional[str] = None
+    similarity_threshold: Optional[float] = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
 
 
 @router.post("/")
@@ -31,6 +35,10 @@ def chat(request: ChatRequest):
             "mode": request.mode,
             "top_k": request.top_k,
             "document_id": request.document_id,
+            "topic": request.topic,
+            "similarity_threshold": request.similarity_threshold,
+            "temperature": request.temperature,
+            "max_tokens": request.max_tokens,
         }
     )
     return result

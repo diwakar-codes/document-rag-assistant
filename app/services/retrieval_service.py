@@ -9,7 +9,12 @@ from app.services.store_service import StoreService
 class RetrievalService:
 
     @staticmethod
-    def retrieve_dense(query: str, top_k: int = 5, document_id: str = None):
+    def retrieve_dense(
+        query: str,
+        top_k: int = 5,
+        document_id: str = None,
+        topic: str = None,
+    ):
 
         query_embedding = EmbeddingService.model.encode(
             query,
@@ -24,8 +29,13 @@ class RetrievalService:
             "include_metadata": True,
         }
 
+        filter_dict = {}
         if document_id:
-            query_kwargs["filter"] = {"document_id": {"$eq": document_id}}
+            filter_dict["document_id"] = {"$eq": document_id}
+        if topic:
+            filter_dict["topic"] = {"$eq": topic}
+        if filter_dict:
+            query_kwargs["filter"] = filter_dict
 
         results = pinecone.index.query(**query_kwargs)
 
@@ -45,9 +55,14 @@ class RetrievalService:
         return response
 
     @staticmethod
-    def retrieve_bm25(query: str, top_k: int = 5, document_id: str = None):
+    def retrieve_bm25(
+        query: str,
+        top_k: int = 5,
+        document_id: str = None,
+        topic: str = None,
+    ):
 
-        chunks = StoreService.list_chunks(document_id=document_id)
+        chunks = StoreService.list_chunks(document_id=document_id, topic=topic)
 
         results = BM25Service.retrieve(query, chunks, top_k=top_k)
 
@@ -73,6 +88,7 @@ class RetrievalService:
         query: str,
         top_k: int = 5,
         document_id: str = None,
+        topic: str = None,
         alpha: float = None,
     ):
         """
@@ -86,10 +102,10 @@ class RetrievalService:
         candidate_pool = settings.BM25_CANDIDATE_POOL
 
         dense_results = RetrievalService.retrieve_dense(
-            query, top_k=candidate_pool, document_id=document_id
+            query, top_k=candidate_pool, document_id=document_id, topic=topic
         )
         bm25_results = RetrievalService.retrieve_bm25(
-            query, top_k=candidate_pool, document_id=document_id
+            query, top_k=candidate_pool, document_id=document_id, topic=topic
         )
 
         def key_of(result):
@@ -141,19 +157,20 @@ class RetrievalService:
         top_k: int = 5,
         mode: str = "dense",
         document_id: str = None,
+        topic: str = None,
     ):
         if mode == "bm25":
             return RetrievalService.retrieve_bm25(
-                query, top_k=top_k, document_id=document_id
+                query, top_k=top_k, document_id=document_id, topic=topic
             )
 
         if mode == "hybrid":
             return RetrievalService.retrieve_hybrid(
-                query, top_k=top_k, document_id=document_id
+                query, top_k=top_k, document_id=document_id, topic=topic
             )
 
         return RetrievalService.retrieve_dense(
-            query, top_k=top_k, document_id=document_id
+            query, top_k=top_k, document_id=document_id, topic=topic
         )
 
     @staticmethod
