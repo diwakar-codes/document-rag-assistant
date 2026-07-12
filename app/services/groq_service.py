@@ -34,21 +34,24 @@ class GroqService:
     """
 
     @staticmethod
-    def generate(question, chunks):
+    def generate(question, chunks, history=None):
 
         prompt = GroqService.build_prompt(
             question,
             chunks
         )
 
+        messages = list(history) if history else []
+        messages.append(
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        )
+
         response = GroqService.client.chat.completions.create(
             model="llama-3.3-70b-versatile",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
+            messages=messages,
             temperature=0,
         )
 

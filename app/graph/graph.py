@@ -1,12 +1,12 @@
 from langgraph.graph import StateGraph, END
-
-from app.graph.state import GraphState
 from app.graph.node import (
+    memory_node,
     retrieve_node,
     generate_node,
     no_context_node,
     route_after_retrieval,
 )
+from app.graph.state import GraphState
 
 builder = StateGraph(GraphState)
 
@@ -24,8 +24,6 @@ builder.add_node(
     "no_context",
     no_context_node,
 )
-
-builder.set_entry_point("retrieve")
 
 builder.add_conditional_edges(
     "retrieve",
@@ -45,5 +43,11 @@ builder.add_edge(
     "no_context",
     END,
 )
+
+builder.add_node("memory", memory_node)
+
+builder.set_entry_point("memory")
+
+builder.add_edge("memory", "retrieve")
 
 graph = builder.compile()
