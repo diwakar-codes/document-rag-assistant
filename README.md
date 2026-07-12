@@ -128,21 +128,32 @@ docker-compose.yml
 
 ## Setup
 
-### 1. Local environment
+Both ways of running this project (local Python, or Docker/Podman) need the
+same `.env` file with your own API keys. Do this step first either way.
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-pip install -r requirements.txt
-```
+### 1. Get your API keys and create `.env`
 
-Create `.env` in the project root:
+1. **Groq** — sign up at [console.groq.com](https://console.groq.com), create
+   an API key under API Keys.
+2. **Pinecone** — sign up at [app.pinecone.io](https://app.pinecone.io), then
+   create an index with:
+   - **Dimension: `384`** (matches the default `EMBEDDING_MODEL`,
+     `sentence-transformers/all-MiniLM-L6-v2` — if you change the embedding
+     model, the index dimension must match its output size instead)
+   - **Metric:** `cosine`
+
+   Copy the index name and an API key from the Pinecone console.
+
+3. In the project root, create a file named `.env` (this file is gitignored
+   and never committed — it's only ever read locally or injected into the
+   container at runtime, never baked into an image):
 
 ```ini
 APP_NAME=AI Study Companion
 APP_VERSION=0.1.0
 API_PREFIX=/api
 
+# Paste your own keys here
 GROQ_API_KEY=your-groq-key
 PINECONE_API_KEY=your-pinecone-key
 PINECONE_INDEX=your-index-name
@@ -164,16 +175,57 @@ OCR_MIN_CHARS_PER_PAGE=20
 LOG_LEVEL=INFO
 ```
 
-Your Pinecone index's vector dimension must match `EMBEDDING_MODEL`'s output
-(384 for `all-MiniLM-L6-v2`).
+Only `GROQ_API_KEY`, `PINECONE_API_KEY`, and `PINECONE_INDEX` need real
+values — everything else already has a sensible default and can be left as
+shown, or omitted entirely.
 
-### 2. Run the backend
+Now pick **one** of the two options below.
+
+### Option A — Run with Docker / Podman (recommended, no local Python setup)
+
+Requires Podman (or Docker) with compose support, and the `.env` file from
+step 1 sitting in the project root.
+
+```bash
+podman compose build   # first time only, or after changing requirements.txt
+podman compose up -d
+```
+
+- Frontend: http://localhost:8501
+- Backend: http://localhost:8000
+
+`docker-compose.yml` passes your `.env` into the backend container via
+`env_file:` at start-up (the keys are never baked into the image), and mounts
+`app/uploads/` and `app/data/` as volumes so uploads and the JSON store
+persist across restarts.
+
+```bash
+podman logs -f rag-backend     # tail backend logs
+podman logs -f rag-frontend    # tail frontend logs
+podman compose down            # stop and remove containers
+```
+
+If you change backend/frontend code, re-run `podman compose build` before
+`up` — it reuses cached layers, so it's fast unless `requirements.txt`
+changed. Both services share one `requirements.txt` for simplicity; splitting
+it per service would shrink the frontend image (it doesn't need `torch` or
+`sentence-transformers`) at the cost of keeping two files in sync.
+
+### Option B — Run locally with a Python virtual environment
+
+```bash
+python -m venv .venv
+.venv\Scripts\activate        # Windows
+pip install -r requirements.txt
+```
+
+Run the backend:
 
 ```bash
 uvicorn app.main:app --reload --port 8000
 ```
 
-### 3. Run the frontend
+Run the frontend (in a second terminal, with the venv activated):
 
 ```bash
 streamlit run streamlit_app/app.py
@@ -182,7 +234,7 @@ streamlit run streamlit_app/app.py
 By default the frontend talks to `http://localhost:8000`; override with the
 `BACKEND_URL` environment variable if the backend runs elsewhere.
 
-### 4. Run the evaluation harness
+### Run the evaluation harness (optional, either setup)
 
 ```bash
 python -m eval.evaluate_rag
@@ -190,29 +242,8 @@ python -m eval.evaluate_rag
 
 Indexes a small self-contained fixture, scores it with DeepEval metrics
 judged by Groq, and cleans up afterwards — no OpenAI key or pre-existing
-data required.
-
-## Running with Podman
-
-```bash
-podman compose build
-podman compose up -d
-```
-
-- Backend: http://localhost:8000
-- Frontend: http://localhost:8501
-
-The backend container reads secrets from your local `.env` via `env_file:`
-(never baked into the image) and mounts `app/uploads/` and `app/data/` as
-volumes so uploads and the JSON store persist across restarts. Stop with:
-
-```bash
-podman compose down
-```
-
-Both services share one `requirements.txt` for simplicity; splitting it per
-service would shrink the frontend image (it doesn't need `torch` or
-`sentence-transformers`) at the cost of keeping two files in sync.
+data required. This runs against the Python environment directly (Option B),
+not inside the containers.
 
 ## API Overview
 
