@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from groq import APIStatusError
 
 from app.core.config import settings
 from app.services.file_service import BASE_UPLOAD_DIR
@@ -21,6 +23,17 @@ app = FastAPI(
 @app.get('/')
 def health():
     return {"status": "healthy"}
+
+
+@app.exception_handler(APIStatusError)
+def groq_api_error_handler(request: Request, exc: APIStatusError):
+    status_code = getattr(exc, "status_code", 503) or 503
+
+    detail = "The AI provider (Groq) returned an error."
+    if status_code == 429:
+        detail = "Groq rate limit reached. Please wait a bit and try again."
+
+    return JSONResponse(status_code=status_code, content={"detail": detail})
 
 app.include_router(upload_router)
 app.include_router(chat_router)

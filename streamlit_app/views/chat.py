@@ -72,7 +72,7 @@ def render_sources(sources):
             st.caption(source["text"][:300])
 
 
-AVATARS = {"user": "You", "assistant": "AI"}
+AVATARS = {"user": ":material/person:", "assistant": ":material/smart_toy:"}
 
 for message in st.session_state.chat_messages:
     with st.chat_message(message["role"], avatar=AVATARS[message["role"]]):
