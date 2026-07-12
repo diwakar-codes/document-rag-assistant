@@ -7,6 +7,7 @@ from app.services.file_service import FileService
 from app.services.embedding_service import EmbeddingService
 from app.services.pinecone_service import PineconeService
 
+
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
 MAX_FILE_SIZE = 10 * 1024 * 1024 # 10 MB MAX

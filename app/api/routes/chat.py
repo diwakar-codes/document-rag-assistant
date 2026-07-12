@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.services.retrieval_service import RetrievalService
+from app.graph.graph import graph
 
 router = APIRouter(
     prefix="/chat",
@@ -8,5 +8,11 @@ router = APIRouter(
 
 @router.post("/")
 def chat(question: str):
-
-   return RetrievalService.chat(question)
+    result = graph.invoke(
+        {
+            "question": question,
+            "sources": [],
+            "answer": "",
+        }
+    )
+    return result
