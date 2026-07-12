@@ -5,6 +5,9 @@ import requests
 
 BASE_URL = os.environ.get("BACKEND_URL", "http://localhost:8000")
 TIMEOUT = 120
+# Large/scanned documents can take many minutes: each low-text page runs a
+# separate Groq Vision OCR call, plus topic tagging and embedding per chunk.
+UPLOAD_TIMEOUT = 900
 
 
 class APIError(Exception):
@@ -15,9 +18,9 @@ def _url(path: str) -> str:
     return f"{BASE_URL}{path}"
 
 
-def _request(method: str, path: str, **kwargs):
+def _request(method: str, path: str, timeout: int = TIMEOUT, **kwargs):
     try:
-        response = requests.request(method, _url(path), timeout=TIMEOUT, **kwargs)
+        response = requests.request(method, _url(path), timeout=timeout, **kwargs)
         response.raise_for_status()
         if response.content:
             return response.json()
@@ -57,16 +60,16 @@ def delete_document(document_id: str):
 
 def upload_document(filename: str, file_bytes: bytes, mime_type: str):
     files = {"file": (filename, file_bytes, mime_type)}
-    return _request("POST", "/upload/", files=files)
+    return _request("POST", "/upload/", files=files, timeout=UPLOAD_TIMEOUT)
 
 
 def preview_upload(filename: str, file_bytes: bytes, mime_type: str):
     files = {"file": (filename, file_bytes, mime_type)}
-    return _request("POST", "/upload/preview", files=files)
+    return _request("POST", "/upload/preview", files=files, timeout=UPLOAD_TIMEOUT)
 
 
 def confirm_upload(payload: dict):
-    return _request("POST", "/upload/confirm", json=payload)
+    return _request("POST", "/upload/confirm", json=payload, timeout=UPLOAD_TIMEOUT)
 
 
 def file_url(path: str) -> str:

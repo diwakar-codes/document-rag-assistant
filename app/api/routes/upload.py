@@ -38,13 +38,13 @@ class ConfirmUploadRequest(BaseModel):
     pages: List[PageText]
 
 
-async def _validate_and_save(file: UploadFile):
+def _validate_and_save(file: UploadFile):
     extension = Path(file.filename).suffix.lower()
 
     if extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Unsupported file type.")
 
-    content = await file.read()
+    content = file.file.read()
 
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
@@ -99,8 +99,8 @@ def _index_document(
 
 
 @router.post("/")
-async def upload_documents(file: UploadFile = File(...)):
-    extension, saved_path = await _validate_and_save(file)
+def upload_documents(file: UploadFile = File(...)):
+    extension, saved_path = _validate_and_save(file)
 
     document_id = str(uuid.uuid4())
     document = DocumentService.extract(
@@ -119,13 +119,13 @@ async def upload_documents(file: UploadFile = File(...)):
 
 
 @router.post("/preview")
-async def preview_upload(file: UploadFile = File(...)):
+def preview_upload(file: UploadFile = File(...)):
     """
     Extract text (running OCR if needed) without indexing yet, so the
     caller can review/correct the extracted text before it is embedded.
     """
 
-    extension, saved_path = await _validate_and_save(file)
+    extension, saved_path = _validate_and_save(file)
 
     document_id = str(uuid.uuid4())
     document = DocumentService.extract(
