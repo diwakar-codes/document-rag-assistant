@@ -1,0 +1,14 @@
+.venv/
+.git/
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.deepeval/
+app/data/
+app/uploads/*
+.env
+test/
+eval/
+README.md
+docs/
