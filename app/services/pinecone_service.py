@@ -1,5 +1,9 @@
+import uuid
+
 from pinecone import Pinecone
+
 from app.core.config import settings
+
 
 class PineconeService:
 
@@ -7,18 +11,21 @@ class PineconeService:
         pc = Pinecone(api_key=settings.PINECONE_API_KEY)
         self.index = pc.Index(settings.PINECONE_INDEX)
 
-    def upsert_chunks(self, chunks):
+    def upsert_chunks(self, embeddings):
         vectors = []
 
-        for chunk in chunks:
+        for embedding in embeddings:
 
             vectors.append(
                 {
-                    "id": f"chunk-{chunk['chunk_id']}",
-                    "values": chunk["embedding"],
+                    "id": str(uuid.uuid4()),
+                    "values": embedding["embedding"],
                     "metadata": {
-                        "page": chunk["page"],
-                        "text": chunk["text"],
+                        "document_id": embedding["document_id"],
+                        "filename": embedding["filename"],
+                        "page": embedding["page"],
+                        "chunk_id": embedding["chunk_id"],
+                        "text": embedding["text"],
                     },
                 }
             )

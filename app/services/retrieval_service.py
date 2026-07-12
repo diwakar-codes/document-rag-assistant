@@ -24,13 +24,14 @@ class RetrievalService:
         response = []
 
         for match in results.matches:
-            response.append(
-                {
-                    "score": match.score,
-                    "page": match.metadata.get("page"),
-                    "text": match.metadata.get("text"),
-                }
-            )
+            response.append({
+                "score": match.score,
+                "document_id": match.metadata.get("document_id"),
+                "filename": match.metadata.get("filename"),
+                "page": match.metadata.get("page"),
+                "chunk_id": match.metadata.get("chunk_id"),
+                "text": match.metadata.get("text"),
+            })
 
         return response
 

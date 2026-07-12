@@ -2,7 +2,7 @@ from app.core.config import settings
 
 class ChunkService:
     @staticmethod
-    def split(document: dict):
+    def split(document: dict, document_id: str, filename: str):
         chunks = []
 
         chunk_id = 1
@@ -22,9 +22,11 @@ class ChunkService:
 
                 chunks.append(
                     {
-                        "chunk_id": chunk_id,
+                        "document_id": document_id,
+                        "filename": filename,
                         "page": page_number,
-                        "text": chunk
+                        "chunk_id": chunk_id,
+                        "text": chunk,
                     }
                 )
 

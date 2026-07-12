@@ -6,7 +6,7 @@ from app.schemas.upload_schema import UploadResponse
 from app.services.file_service import FileService
 from app.services.embedding_service import EmbeddingService
 from app.services.pinecone_service import PineconeService
-
+import uuid
 
 router = APIRouter(prefix="/upload", tags=["Upload"])
 
@@ -44,9 +44,14 @@ async def upload_documents(file: UploadFile = File(...)):
 
     file.file.seek(0)
 
+    document_id = str(uuid.uuid4())
     saved_path = FileService.save_file(file)
-    document = DocumentService.extract(saved_path)
-    chunks = ChunkService.split(document)
+    document = DocumentService.extract(
+        file_path = saved_path,
+        document_id=document_id,
+        filename=file.filename,    
+    )
+    chunks = ChunkService.split(document=document, document_id=document_id,filename=file.filename,)
     embedded_chunks = EmbeddingService.embed_chunks(chunks)
     pinecone = PineconeService()
     pinecone.upsert_chunks(embedded_chunks)

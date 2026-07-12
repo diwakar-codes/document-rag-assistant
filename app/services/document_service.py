@@ -6,7 +6,7 @@ from app.services.pdf_service import PDFService
 class DocumentService:
 
     @staticmethod
-    def extract(file_path: str):
+    def extract(file_path: str, document_id, filename):
         extension = Path(file_path).suffix.lower()
 
         if extension == ".pdf":
