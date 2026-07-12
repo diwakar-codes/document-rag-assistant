@@ -1,5 +1,6 @@
 from app.services.embedding_service import EmbeddingService
 from app.services.pinecone_service import PineconeService
+from app.services.groq_service import GroqService
 
 
 class RetrievalService:
@@ -17,9 +18,9 @@ class RetrievalService:
         results = pinecone.index.query(
             vector=query_embedding,
             top_k=top_k,
-            include_metadata=True
+            include_metadata=True,
         )
-        
+
         response = []
 
         for match in results.matches:
@@ -30,5 +31,21 @@ class RetrievalService:
                     "text": match.metadata.get("text"),
                 }
             )
-        
+
         return response
+
+    @staticmethod
+    def chat(question: str):
+
+        chunks = RetrievalService.retrieve(question)
+
+        answer = GroqService.generate(
+            question,
+            chunks,
+        )
+
+        return {
+            "question": question,
+            "answer": answer,
+            "sources": chunks,
+        }

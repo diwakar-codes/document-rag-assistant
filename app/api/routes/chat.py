@@ -7,7 +7,6 @@ router = APIRouter(
 )
 
 @router.post("/")
-def ask(question: str):
-    result = RetrievalService.retrieve(question)
-    return result
+def chat(question: str):
 
+   return RetrievalService.chat(question)
