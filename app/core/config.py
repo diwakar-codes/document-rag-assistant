@@ -19,6 +19,20 @@ class Settings(BaseSettings):
     # Rag configs
     CHUNK_SIZE: int = 500
     CHUNK_OVERLAP: int = 100
+    DEFAULT_TOP_K: int = 5
+    SIMILARITY_THRESHOLD: float = 0.10
+
+    # Hybrid retrieval (dense + BM25)
+    HYBRID_ALPHA: float = 0.5
+    BM25_CANDIDATE_POOL: int = 30
+
+    # Groq generation
+    DEFAULT_TEMPERATURE: float = 0.2
+    DEFAULT_MAX_TOKENS: int = 1024
+
+    # Vision OCR
+    GROQ_VISION_MODEL: str = "meta-llama/llama-4-scout-17b-16e-instruct"
+    OCR_MIN_CHARS_PER_PAGE: int = 20
 
     # Logging
     LOG_LEVEL: str = "INFO"

@@ -26,6 +26,7 @@ class PineconeService:
                         "page": embedding["page"],
                         "chunk_id": embedding["chunk_id"],
                         "text": embedding["text"],
+                        "topic": embedding.get("topic") or "",
                     },
                 }
             )

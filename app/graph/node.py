@@ -1,24 +1,32 @@
+from app.core.config import settings
 from app.services.retrieval_service import RetrievalService
 from app.services.groq_service import GroqService
 from app.memory.conversation import memory
 
-SIMILARITY_THRESHOLD = 0.10
-
 
 def retrieve_node(state):
     question = state["question"]
+    mode = state.get("mode") or "dense"
+    top_k = state.get("top_k") or settings.DEFAULT_TOP_K
+    document_id = state.get("document_id")
 
-    sources = RetrievalService.retrieve(question)
+    sources = RetrievalService.retrieve(
+        question,
+        top_k=top_k,
+        mode=mode,
+        document_id=document_id,
+    )
 
-    print("Retrieved Sources:", sources)
-
-    filtered_sources = [
-        source
-        for source in sources
-        if source["score"] >= SIMILARITY_THRESHOLD
-    ]
-
-    print("Filtered Sources:", filtered_sources)
+    if mode == "bm25":
+        # Raw BM25 scores are unbounded, so the similarity threshold
+        # (tuned for cosine similarity) does not apply in this mode.
+        filtered_sources = sources
+    else:
+        filtered_sources = [
+            source
+            for source in sources
+            if source.get("score", 0) >= settings.SIMILARITY_THRESHOLD
+        ]
 
     return {
         "sources": filtered_sources,

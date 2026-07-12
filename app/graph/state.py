@@ -1,4 +1,5 @@
-from typing import TypedDict
+from typing import Optional, TypedDict
+
 
 class GraphState(TypedDict):
     question: str
@@ -6,4 +7,6 @@ class GraphState(TypedDict):
     answer: str
     has_context: bool
     history: list
-    
+    mode: str
+    top_k: int
+    document_id: Optional[str]
