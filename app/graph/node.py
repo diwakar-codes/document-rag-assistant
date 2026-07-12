@@ -1,4 +1,5 @@
 from app.core.config import settings
+from app.services.citation_service import CitationService
 from app.services.retrieval_service import RetrievalService
 from app.services.groq_service import GroqService
 from app.memory.conversation import memory
@@ -29,7 +30,7 @@ def retrieve_node(state):
         ]
 
     return {
-        "sources": filtered_sources,
+        "sources": CitationService.format_sources(filtered_sources),
         "has_context": len(filtered_sources) > 0,
     }
 

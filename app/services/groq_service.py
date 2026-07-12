@@ -11,14 +11,17 @@ class GroqService:
     def build_prompt(question, chunks):
 
         context = "\n\n".join(
-            chunk["text"]
-            for chunk in chunks
+            f"[Source {index}: {chunk.get('filename', 'Unknown')}"
+            f"{', Page ' + str(chunk['page']) if chunk.get('page') else ''}]\n"
+            f"{chunk['text']}"
+            for index, chunk in enumerate(chunks, start=1)
         )
 
         return f"""
     You are an intelligent document assistant.
 
-    Answer ONLY using the context below.
+    Answer ONLY using the context below. When your answer relies on a
+    specific source, mention it inline as (Source N).
 
     If the answer is not present, say:
 
