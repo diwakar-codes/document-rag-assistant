@@ -1,0 +1,21 @@
+{
+  "fixture_text": "Round Robin is a CPU scheduling algorithm that assigns a fixed time slice, called a time quantum, to each process in a cyclic order. If a process does not finish within its time quantum, it is preempted and moved to the back of the ready queue. Round Robin is designed for time-sharing systems and ensures fairness among processes, since no process waits longer than (n-1) time quanta for its next turn, where n is the number of processes. Shortest Job First (SJF) scheduling instead selects the process with the smallest estimated execution time to run next. SJF minimizes average waiting time compared to other non-preemptive algorithms, but it can cause starvation for longer processes if short jobs keep arriving.",
+  "questions": [
+    {
+      "question": "What is a time quantum in Round Robin scheduling?",
+      "ground_truth": "A time quantum is the fixed time slice assigned to each process in Round Robin scheduling, given in cyclic order."
+    },
+    {
+      "question": "What happens if a process does not finish within its time quantum in Round Robin?",
+      "ground_truth": "The process is preempted and moved to the back of the ready queue."
+    },
+    {
+      "question": "Which scheduling algorithm can cause starvation for long processes?",
+      "ground_truth": "Shortest Job First (SJF) can cause starvation for longer processes."
+    },
+    {
+      "question": "What does Shortest Job First scheduling minimize?",
+      "ground_truth": "SJF minimizes the average waiting time compared to other non-preemptive algorithms."
+    }
+  ]
+}
