@@ -4,4 +4,5 @@ class GraphState(TypedDict):
     question: str
     sources: list
     answer: str
+    has_context: bool
     

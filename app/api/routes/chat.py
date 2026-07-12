@@ -13,6 +13,7 @@ def chat(question: str):
             "question": question,
             "sources": [],
             "answer": "",
+            "has_context": False,
         }
     )
     return result
